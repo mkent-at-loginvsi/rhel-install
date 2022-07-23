@@ -15,7 +15,7 @@ echo "Creating Build Directory"
 echo "--------------------------------"
 dir="build-$(date +%Y_%m_%d_%H_%M_%S)"
 export BUILD_DIR="$PWD/$dir"
-output="appliance"
+out_dir="appliance"
 sudo mkdir $dir
 echo "--------------------------------"
 echo "Relative Build Direcory: $dir"
@@ -28,7 +28,7 @@ echo "Downloading Virtual Appliance to $BUILD_DIR/$applianceFile"
 echo "--------------------------------"
 applianceFile="AZ-VA-LoginEnterprise-4.8.10.zip"
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
-  sudo curl -O "https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile" -o "$BUILD_DIR/$applianceFile"
+  sudo curl -o $BUILD_DIR/$applianceFile https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile
 fi
 
 
@@ -61,30 +61,31 @@ if ! [ -f /mnt/vhd/loginvsi ]; then
 fi
 
 # Copy Files and Directories to output dir
-sudo mkdir $output
+build_out=$BUILD_DIR/$out_dir
+sudo mkdir $build_out
 
 # Copy Login Enterprise Installation
-sudo cp -r /mnt/vhd/loginvsi $output/
+sudo cp -r /mnt/vhd/loginvsi $build_out/
 
 #Copy Login Enterprise Service
-sudo mkdir -p $output/etc/systemd/system/
-sudo cp -f /mnt/vhd/etc/systemd/system/loginvsid.service $output/etc/systemd/system/loginvsid.service
+sudo mkdir -p $build_out/etc/systemd/system/
+sudo cp -f /mnt/vhd/etc/systemd/system/loginvsid.service $build_out/etc/systemd/system/loginvsid.service
 
 #Copy Login Enterprise Service Watcher
-sudo cp -f /mnt/vhd/etc/systemd/system/pi_guard.service $output/mnt/vhd/etc/systemd/system/pi_guard.service
+sudo cp -f /mnt/vhd/etc/systemd/system/pi_guard.service $build_out/mnt/vhd/etc/systemd/system/pi_guard.service
 
 #Copy hidden files
-sudo mkdir -p $output/root
+sudo mkdir -p $build_out/root
 #sudo cp -f /mnt/vhd/root/.play output/root/.play
 
 #Copy firstrun, daemon and Menuing
-sudo mkdir -p $output/usr/bin
-sudo cp -f /mnt/vhd/usr/bin/loginvsid $output/usr/bin/loginvsid
+sudo mkdir -p $build_out/usr/bin
+sudo cp -f /mnt/vhd/usr/bin/loginvsid $build_out/usr/bin/loginvsid
 sudo curl -O https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
-sudo cp -f pdmenu $output/usr/bin/
+sudo cp -f pdmenu $build_out/usr/bin/
 
 #zip up appliance build
-sudo tar -cfzv $output.tar.gz $output/*
+sudo tar -cfzv $out_dir.tar.gz $build_out/*
 
 #Unmount vhd
 sudo guestunmount /mnt/vhd
