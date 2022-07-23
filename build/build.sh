@@ -10,12 +10,16 @@ if [[ $FREE -lt 39062500 ]]; then               # 40G = 26*1024*1024k (Kibibyte)
 fi
 
 # Create Build Directory
+echo "Creating Build Directory"
 dir="build-$(date +%Y_%m_%d_%H_%M_%S)"
 export BUILD_DIR="$PWD/$dir"
 output="appliance"
 sudo mkdir $dir
+echo "Relative Build Direcory: $dir"
+echo "Full Path Build Directory: $BUILD_DIR"
 
 # Download VHD
+echo "Downloading Virtual Appliance"
 applianceFile="AZ-VA-LoginEnterprise-4.8.10.zip"
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
   sudo curl -O "https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile" -o "$BUILD_DIR/$applianceFile"
@@ -23,17 +27,26 @@ fi
 
 
 # Unzip VHD
+echo "Unzipping Virtual Appliance VHD"
 sudo yum install -y unzip
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
-  sudo unzip $applianceFile
+  sudo unzip $BUILD_DIR/$applianceFile
 fi
 
 # Mount VHD
+echo "Mounting Virtual Hard Drive"
 sudo yum install -y libguestfs-tools
 sudo mkdir /mnt/vhd
-mountpath="$PWD"
+mountpath="$BUILD_DIR"
 export LIBGUESTFS_BACKEND=direct
 sudo guestmount --add $mountpath/AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
+
+# Fail if VHD doesn't exist
+echo "Checking if VHD Mounted"
+if ! [ -f /mnt/vhd/loginvsi ]; then
+  echo "Mount failed"
+  return 1
+fi
 
 # Copy Files and Directories to output dir
 sudo mkdir $output
