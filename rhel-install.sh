@@ -1,5 +1,7 @@
 #!/bin/bash
-adm_user="ec2_user"
+adm_user="ec2-user"
+temp_dir="/tmp/le-inst"
+tar_file="/home/ec2-user/appliance.tar.gz"
 
 # Need 2CPU
 # Need 4GB RAM
@@ -14,24 +16,24 @@ FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
 if [[ $FREE -lt 27262976 ]]; then               # 26G = 26*1024*1024k
      # less than 26GBs free!
      echo "The installation requires 26GB Free on the root partition (/)"
-     exit
+     #exit
 fi
 
 echo "### Set Admin Password ###"
-passwd ec2_user
-groupmod -n administrator ec2_user
+passwd $adm_user
+groupmod -n administrator $adm_user
 
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 systemctl restart sshd
 
 #curl http://upload.loginvsi.com/Support/le449.clean.install.tar.gz -O /tmp/le449.clean.install.tar.gz
-mkdir /tmp/le-inst
-tar -zxvf /tmp/<>.tar.gz -C /tmp/le-inst
-cp -R /tmp/le-appl-inst/4.4.9/loginvsi /
-cp -R /tmp/le-appl-inst/4.4.9/usr /
-cp -R /tmp/le-appl-inst/4.4.9/root /
-cp -f /tmp/le-appl-inst/4.4.9/loginvsid.service /etc/systemd/system/
-cp -f /loginvsi/bin/guard/pi_guard.service /etc/systemd/system/
+mkdir $temp_dir
+tar -zxvf /tmp/<>.tar.gz -C $temp_dir
+cp -R $temp_dir/appliance/loginvsi /
+cp -R $temp_dir/appliance/usr /
+cp -R $temp_dir/appliance/root /
+cp -f $temp_dir/appliance/etc/systemd/system/loginvsid.service /etc/systemd/system/
+cp -f $temp_dir/appliance/etc/systemd/system/pi_guard.service /etc/systemd/system/
 systemctl enable pi_guard
 systemctl enable loginvsid
 
