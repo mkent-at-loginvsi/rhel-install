@@ -22,11 +22,11 @@ echo "Relative Build Direcory: $dir"
 echo "Full Path Build Directory: $BUILD_DIR"
 echo "--------------------------------"
 
-# Download VHD
+# Download Appliance VHD zip
+applianceFile="AZ-VA-LoginEnterprise-4.8.10.zip"
 echo "--------------------------------"
 echo "Downloading Virtual Appliance to $BUILD_DIR/$applianceFile"
 echo "--------------------------------"
-applianceFile="AZ-VA-LoginEnterprise-4.8.10.zip"
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
   sudo curl -o $BUILD_DIR/$applianceFile https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile
 fi
@@ -34,7 +34,7 @@ fi
 
 # Unzip VHD
 echo "--------------------------------"
-echo "Unzipping Virtual Appliance VHD"
+echo "Unzipping Virtual Appliance VHD $BUILD_DIR/$applianceFile"
 echo "--------------------------------"
 sudo yum install -y unzip
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
