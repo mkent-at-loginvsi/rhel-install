@@ -1,4 +1,6 @@
-#!/bin/#!/usr/bin/env bash
+#!/bin/bash
+echo "The script you are running has basename $( basename -- "$0"; ), dirname $( dirname -- "$0"; )";
+echo "The present working directory is $( pwd; )";
 # Disk space check
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
 if [[ $FREE -lt 39062500 ]]; then               # 40G = 26*1024*1024k (Kibibyte)
@@ -12,12 +14,11 @@ dir="build-$(date +%Y_%m_%d_%H_%M_%S)"
 export BUILD_DIR="$PWD/$dir"
 output="appliance"
 sudo mkdir $dir
-cd $dir
 
 # Download VHD
-applianceFile = "AZ-VA-LoginEnterprise-4.8.10.zip"
+applianceFile="AZ-VA-LoginEnterprise-4.8.10.zip"
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
-  sudo curl -O "https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile"
+  sudo curl -O "https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile" -o "$BUILD_DIR/$applianceFile"
 fi
 
 
@@ -26,7 +27,6 @@ sudo yum install -y unzip
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
   sudo unzip $applianceFile
 fi
-sudo unzip AZ-VA-LoginEnterprise-4.8.10.zip
 
 # Mount VHD
 sudo yum install -y libguestfs-tools
