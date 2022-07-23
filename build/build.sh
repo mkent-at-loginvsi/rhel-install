@@ -33,7 +33,7 @@ sudo yum install -y libguestfs-tools
 sudo mkdir /mnt/vhd
 mountpath="$PWD"
 export LIBGUESTFS_BACKEND=direct
-sudo guestmount --add $mountpath\AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
+sudo guestmount --add $mountpath/AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
 
 # Copy Files and Directories to output dir
 sudo mkdir $output
