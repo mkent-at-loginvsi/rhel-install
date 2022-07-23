@@ -9,6 +9,7 @@ fi
 
 # Create Build Directory
 dir="build-$(date +%Y_%m_%d_%H_%M_%S)"
+output="appliance"
 sudo mkdir $dir
 cd $dir
 
@@ -26,38 +27,30 @@ sudo export LIBGUESTFS_BACKEND=direct
 sudo guestmount --add AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
 
 # Copy Files and Directories to output dir
-sudo mkdir output
+sudo mkdir $output
 
 # Copy Login Enterprise Installation
-sudo cp -r /mnt/vhd/loginvsi output/
+sudo cp -r /mnt/vhd/loginvsi $output/
 
 #Copy Login Enterprise Service
-sudo mkdir -p output/etc/systemd/system/
-sudo cp -f /mnt/vhd/etc/systemd/system/loginvsid.service output/etc/systemd/system/loginvsid.service
+sudo mkdir -p $output/etc/systemd/system/
+sudo cp -f /mnt/vhd/etc/systemd/system/loginvsid.service $output/etc/systemd/system/loginvsid.service
 
 #Copy Login Enterprise Service Watcher
-sudo cp -f /mnt/vhd/etc/systemd/system/pi_guard.service output/mnt/vhd/etc/systemd/system/pi_guard.service
+sudo cp -f /mnt/vhd/etc/systemd/system/pi_guard.service $output/mnt/vhd/etc/systemd/system/pi_guard.service
 
 #Copy hidden files
-sudo mkdir -p output/root
-sudo cp -f /mnt/vhd/root/.hosting output/root/.hosting
-sudo cp -f /mnt/vhd/root/.play output/root/.play
+sudo mkdir -p $output/root
+#sudo cp -f /mnt/vhd/root/.play output/root/.play
 
 #Copy firstrun, daemon and Menuing
-sudo mkdir -p output/usr/bin
-
-#Copy Login Enterprise Service Watcher
-sudo cp -f /mnt/vhd/etc/systemd/system/pi_guard.service output/mnt/vhd/etc/systemd/system/pi_guard.service
-
-#Copy hidden files
-sudo mkdir -p output/root
-sudo cp -f /mnt/vhd/root/.play output/root/.play
-
-#Copy firstrun, daemon and Menuing
-sudo mkdir -p output/usr/bin
-sudo cp -f /mnt/vhd/usr/bin/loginvsid output/usr/bin/loginvsid
+sudo mkdir -p $output/usr/bin
+sudo cp -f /mnt/vhd/usr/bin/loginvsid $output/usr/bin/loginvsid
 curl -O https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
-sudo cp -f pdmenu output/usr/bin/
+sudo cp -f pdmenu $output/usr/bin/
 
 #zip up appliance build
-sudo tar -c -f -z -v appliance.tar.gz output/*
+sudo tar -c -f -z -v $output.tar.gz $output/*
+
+#Unmount vhd
+sudo guestunmount /mnt/vhd
