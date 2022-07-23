@@ -57,5 +57,7 @@ sudo cp -f /mnt/vhd/root/.play output/root/.play
 sudo mkdir -p output/usr/bin
 sudo cp -f /mnt/vhd/usr/bin/loginvsid output/usr/bin/loginvsid
 curl -O https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
-mv pdmenu.rhel pdmenu
-sudo cp -f pdmenu output/usr/bin/pdmenu
+sudo cp -f pdmenu output/usr/bin/
+
+#zip up appliance build
+sudo tar -c -f -z -v appliance.tar.gz output/*
