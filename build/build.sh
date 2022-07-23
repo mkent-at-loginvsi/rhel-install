@@ -9,21 +9,29 @@ fi
 
 # Create Build Directory
 dir="build-$(date +%Y_%m_%d_%H_%M_%S)"
+export BUILD_DIR="$PWD/$dir"
 output="appliance"
 sudo mkdir $dir
 cd $dir
 
 # Download VHD
-sudo curl -O "https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/AZ-VA-LoginEnterprise-4.8.10.zip"
+applianceFile = "AZ-VA-LoginEnterprise-4.8.10.zip"
+if ! [ -f /home/$outputfile ]; then
+  sudo curl -O "https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile"
+fi
+
 
 # Unzip VHD
 sudo yum install -y unzip
+if ! [ -f /home/$outputfile ]; then
+  sudo unzip $applianceFile
+fi
 sudo unzip AZ-VA-LoginEnterprise-4.8.10.zip
 
 # Mount VHD
 sudo yum install -y libguestfs-tools
 sudo mkdir /mnt/vhd
-mountpath="$PWD/$dir"
+mountpath="$PWD"
 export LIBGUESTFS_BACKEND=direct
 sudo guestmount --add $mountpath\AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
 
@@ -55,3 +63,4 @@ sudo tar -cfzv $output.tar.gz $output/*
 
 #Unmount vhd
 sudo guestunmount /mnt/vhd
+unset BUILD_DIR
