@@ -56,6 +56,6 @@ sudo cp -f /mnt/vhd/root/.play output/root/.play
 #Copy firstrun, daemon and Menuing
 sudo mkdir -p output/usr/bin
 sudo cp -f /mnt/vhd/usr/bin/loginvsid output/usr/bin/loginvsid
-
-
-#https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginPI3_ISO/public/LoginEnterprise-4.8.10.iso
+curl -O https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
+mv pdmenu.rhel pdmenu
+sudo cp -f pdmenu output/usr/bin/pdmenu
