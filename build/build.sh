@@ -16,14 +16,14 @@ cd $dir
 
 # Download VHD
 applianceFile = "AZ-VA-LoginEnterprise-4.8.10.zip"
-if ! [ -f /home/$outputfile ]; then
+if ! [ -f $BUILD_DIR/$applianceFile ]; then
   sudo curl -O "https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile"
 fi
 
 
 # Unzip VHD
 sudo yum install -y unzip
-if ! [ -f /home/$outputfile ]; then
+if ! [ -f $BUILD_DIR/$applianceFile ]; then
   sudo unzip $applianceFile
 fi
 sudo unzip AZ-VA-LoginEnterprise-4.8.10.zip
