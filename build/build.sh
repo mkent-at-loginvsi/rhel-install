@@ -50,7 +50,7 @@ curl -O https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu
 sudo cp -f pdmenu $output/usr/bin/
 
 #zip up appliance build
-sudo tar -c -f -z -v $output.tar.gz $output/*
+sudo tar -cfzv $output.tar.gz $output/*
 
 #Unmount vhd
 sudo guestunmount /mnt/vhd
