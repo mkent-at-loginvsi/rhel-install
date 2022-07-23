@@ -23,8 +23,8 @@ sudo unzip AZ-VA-LoginEnterprise-4.8.10.zip
 # Mount VHD
 sudo yum install -y libguestfs-tools
 sudo mkdir /mnt/vhd
-sudo export LIBGUESTFS_BACKEND=direct
-sudo guestmount --add AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
+export LIBGUESTFS_BACKEND=direct
+sudo guestmount --add $dir\AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
 
 # Copy Files and Directories to output dir
 sudo mkdir $output
