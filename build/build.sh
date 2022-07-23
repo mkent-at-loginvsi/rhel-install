@@ -14,11 +14,11 @@ sudo mkdir $dir
 cd $dir
 
 # Download VHD
-curl -O "https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/AZ-VA-LoginEnterprise-4.8.10.zip"
+sudo curl -O "https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/AZ-VA-LoginEnterprise-4.8.10.zip"
 
 # Unzip VHD
 sudo yum install -y unzip
-unzip AZ-VA-LoginEnterprise-4.8.10.zip
+sudo unzip AZ-VA-LoginEnterprise-4.8.10.zip
 
 # Mount VHD
 sudo yum install -y libguestfs-tools
@@ -46,7 +46,7 @@ sudo mkdir -p $output/root
 #Copy firstrun, daemon and Menuing
 sudo mkdir -p $output/usr/bin
 sudo cp -f /mnt/vhd/usr/bin/loginvsid $output/usr/bin/loginvsid
-curl -O https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
+sudo curl -O https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
 sudo cp -f pdmenu $output/usr/bin/
 
 #zip up appliance build
