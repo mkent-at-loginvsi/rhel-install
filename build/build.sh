@@ -34,7 +34,13 @@ echo "----------------------------------------------------------------"
 
 # Shortcut for testing...if the appliance zip is one level up, copy it
 if [ -f ../$BUILD_DIR/$applianceFile ]; then
+  echo "copying ../$BUILD_DIR/$applianceFile"
   sudo cp ../$BUILD_DIR/$applianceFile $BUILD_DIR
+fi
+
+if [ -f $applianceFile ]; then
+  echo "copying $applianceFile"
+  sudo cp $applianceFile $BUILD_DIR
 fi
 
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
