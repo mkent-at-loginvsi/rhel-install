@@ -38,7 +38,7 @@ echo "Unzipping Virtual Appliance VHD $BUILD_DIR/$applianceFile"
 echo "--------------------------------"
 sudo yum install -y unzip
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
-  sudo unzip $BUILD_DIR/$applianceFile
+  sudo unzip -d $BUILD_DIR $BUILD_DIR/$applianceFile
 fi
 
 # Mount VHD
