@@ -76,7 +76,7 @@ guestmount --add $mountpath/AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /
 echo "----------------------------------------------------------------"
 echo "Checking if VHD Mounted"
 echo "----------------------------------------------------------------"
-if ! [ -f /mnt/vhd/loginvsi ]; then
+if ! [ -d /mnt/vhd/loginvsi ]; then
   echo "Mount failed"
   exit 1
 fi
