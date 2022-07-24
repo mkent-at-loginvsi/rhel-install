@@ -65,7 +65,9 @@ echo "----------------------------------------------------------------"
 sudo yum install -y libguestfs-tools
 sudo mkdir /mnt/vhd
 mountpath="$BUILD_DIR"
-export LIBGUESTFS_BACKEND=direct
+LIBGUESTFS_BACKEND=direct
+export LIBGUESTFS_BACKEND
+echo $LIBGUESTFS_BACKEND
 sudo guestmount --add $mountpath/AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
 
 # Fail if VHD doesn't exist
