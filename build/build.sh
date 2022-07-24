@@ -1,50 +1,61 @@
 #!/bin/bash
+echo "----------------------------------------------------------------"
 echo "The script you are running has basename $( basename -- "$0"; ), dirname $( dirname -- "$0"; )";
 echo "The present working directory is $( pwd; )";
+echo "----------------------------------------------------------------"
 # Disk space check
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
 if [[ $FREE -lt 39062500 ]]; then               # 40G = 26*1024*1024k (Kibibyte)
      # less than 26GBs free!
+     echo "----------------------------------------------------------------"
      echo "The installation requires 40GB Free on the root partition (/)"
+     echo "----------------------------------------------------------------"
      #exit
 fi
 
 # Create Build Directory
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
 echo "Creating Build Directory"
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
 dir="build-$(date +%Y_%m_%d_%H_%M_%S)"
 export BUILD_DIR="$PWD/$dir"
 out_dir="appliance"
 sudo mkdir $dir
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
 echo "Relative Build Direcory: $dir"
 echo "Full Path Build Directory: $BUILD_DIR"
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
 
 # Download Appliance VHD zip
 applianceFile="AZ-VA-LoginEnterprise-4.8.10.zip"
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
 echo "Downloading Virtual Appliance to $BUILD_DIR/$applianceFile"
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
+
+# Shortcut for testing...if the appliance zip is one level up, copy it
+if [ -f ../$BUILD_DIR/$applianceFile ]; then
+  sudo cp ../$BUILD_DIR/$applianceFile $BUILD_DIR
+fi
+
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
   sudo curl -o $BUILD_DIR/$applianceFile https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile
 fi
 
 
 # Unzip VHD
-echo "--------------------------------"
+
+echo "----------------------------------------------------------------"
 echo "Unzipping Virtual Appliance VHD $BUILD_DIR/$applianceFile"
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
 sudo yum install -y unzip
-if ! [ -f $BUILD_DIR/$applianceFile ]; then
+if ! [ -f $BUILD_DIR/"${applianceFile/zip/vhd}" ]; then
   sudo unzip -d $BUILD_DIR $BUILD_DIR/$applianceFile
 fi
 
 # Mount VHD
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
 echo "Mounting Virtual Hard Drive"
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
 sudo yum install -y libguestfs-tools
 sudo mkdir /mnt/vhd
 mountpath="$BUILD_DIR"
@@ -52,12 +63,12 @@ export LIBGUESTFS_BACKEND=direct
 sudo guestmount --add $mountpath/AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
 
 # Fail if VHD doesn't exist
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
 echo "Checking if VHD Mounted"
-echo "--------------------------------"
+echo "----------------------------------------------------------------"
 if ! [ -f /mnt/vhd/loginvsi ]; then
   echo "Mount failed"
-  return 1
+  exit 1
 fi
 
 # Copy Files and Directories to output dir
@@ -85,7 +96,7 @@ sudo curl -O https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/p
 sudo cp -f pdmenu $build_out/usr/bin/
 
 #zip up appliance build
-sudo tar -cfzv $out_dir.tar.gz $build_out/*
+sudo tar -czvf $out_dir.tar.gz $build_out/*
 
 #Unmount vhd
 sudo guestunmount /mnt/vhd
