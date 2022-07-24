@@ -1,3 +1,3 @@
-sudo guestunmount /mnt/vhd
+sudo guestunmount /mnt/vhd > /dev/null
 unset BUILD_DIR
-rm -r */
+sudo rm -r */
