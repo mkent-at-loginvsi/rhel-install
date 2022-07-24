@@ -64,11 +64,13 @@ echo "Mounting Virtual Hard Drive"
 echo "----------------------------------------------------------------"
 sudo yum install -y libguestfs-tools
 sudo mkdir /mnt/vhd
+sudo chmod 777 /mnt/vhd
+
 mountpath="$BUILD_DIR"
 LIBGUESTFS_BACKEND=direct
 export LIBGUESTFS_BACKEND
 echo $LIBGUESTFS_BACKEND
-sudo LIBGUESTFS_BACKEND=direct guestmount --add $mountpath/AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
+guestmount --add $mountpath/AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
 
 # Fail if VHD doesn't exist
 echo "----------------------------------------------------------------"
