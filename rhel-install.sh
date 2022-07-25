@@ -30,28 +30,28 @@ if [ $FREE -lt 27262976 ]; then               # 26G = 26*1024*1024k
 fi
 
 CPUS=`getconf _NPROCESSORS_ONLN`
-if [ $CPUS != "2" ]; then
-#    echo "----------------------------------------------------------------"
-#    echo "### WARNING: 2CPUS Required! ###"
-#    echo "----------------------------------------------------------------"
-#    exit 1
+if [ $CPUS -lt 2 ]; then
+     echo "----------------------------------------------------------------"
+     echo "### WARNING: 2CPUS Required! ###"
+     echo "----------------------------------------------------------------"
+     exit 1
 fi
 
-RAM=`sudo dmidecode -t 17 | grep "Size.*MB" | awk '{s+=$2} END {print s / 1024}'`
-#if [[ $RAM != 4]]; then
-#    echo "----------------------------------------------------------------"
-#    echo "### WARNING: 4GB RAM Required! ###"
-#    echo "----------------------------------------------------------------"
-#    exit 1
-#fi
+RAM=`sudo dmidecode -t 17 | grep "Size.*MB" | awk '{s+=$2} END {print s / 1024}' | awk -F'.' '{print $1}'`
+if [ $RAM -lt 4 ]; then
+     echo "----------------------------------------------------------------"
+     echo "### WARNING: 4GB RAM Required! ###"
+     echo "----------------------------------------------------------------"
+     exit 1
+fi
 
 SUB=`sudo subscription-manager status | grep "Overall Status:*" | awk -F': ' '{print $2}'`
-#if [[ $SUB != "Current"]]; then
-#    echo "----------------------------------------------------------------"
-#    echo "### WARNING: Red-Hat Subscription Required! ###"
-#    echo "----------------------------------------------------------------"
-#    exit 1
-#fi
+if [ $SUB != "Current" ]; then
+     echo "----------------------------------------------------------------"
+     echo "### WARNING: Red-Hat Subscription Required! ###"
+     echo "----------------------------------------------------------------"
+     exit 1
+fi
 
 echo "----------------------------------------------------------------"
 echo "Build Swapfile"
