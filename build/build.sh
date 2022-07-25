@@ -98,7 +98,7 @@ echo "----------------------------------------------------------------"
 echo "Packaging Archive"
 echo "----------------------------------------------------------------"
 cd $BUILD_DIR
-tar -czvf "$OUTPUT_DIR/$out_dir.tar.gz" $out_dir
+tar -czvf $out_dir.tar.gz $out_dir
 #TODO: Move to working dir
 #echo "mv -v $out_dir.tar.gz $OUTPUT_DIR"
 #mv -v $out_dir.tar.gz $OUTPUT_DIR
@@ -109,6 +109,7 @@ echo "----------------------------------------------------------------"
 echo "Cleaning up"
 echo "----------------------------------------------------------------"
 sudo guestunmount /mnt/vhd
+sh clean.sh
 unset BUILD_DIR
 unset WORK_DIR
 unset OUTPUT_DIR
