@@ -38,7 +38,7 @@ fi
 #fi
 
 RAM=`sudo dmidecode -t 17 | grep "Size.*MB" | awk '{s+=$2} END {print s / 1024}'`
-if [[ $CPUS -lt 4]]; then
+if [[ $RAM != 4]]; then
     echo "----------------------------------------------------------------"
     echo "### WARNING: 4GB RAM Required! ###"
     echo "----------------------------------------------------------------"
