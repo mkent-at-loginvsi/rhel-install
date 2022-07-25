@@ -30,7 +30,7 @@ if [ $FREE -lt 27262976 ]; then               # 26G = 26*1024*1024k
 fi
 
 CPUS=`getconf _NPROCESSORS_ONLN`
-if [ $CPUS -lt 2 ]; then
+if [ $CPUS != "2" ]; then
 #    echo "----------------------------------------------------------------"
 #    echo "### WARNING: 2CPUS Required! ###"
 #    echo "----------------------------------------------------------------"
