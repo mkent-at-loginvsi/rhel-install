@@ -28,7 +28,7 @@ systemctl restart sshd
 
 #curl http://upload.loginvsi.com/Support/le449.clean.install.tar.gz -O /tmp/le449.clean.install.tar.gz
 mkdir $temp_dir
-tar -zxvf /tmp/<>.tar.gz -C $temp_dir
+tar -zxvf $tar_file -C $temp_dir
 cp -R $temp_dir/appliance/loginvsi /
 cp -R $temp_dir/appliance/usr /
 cp -R $temp_dir/appliance/root /
@@ -37,28 +37,68 @@ cp -f $temp_dir/appliance/etc/systemd/system/pi_guard.service /etc/systemd/syste
 systemctl enable pi_guard
 systemctl enable loginvsid
 
-mv /usr/bin/pdmenu.rhel /usr/bin/pdmenu
+mv $temp_dir/appliance/usr/bin/pdmenu /usr/bin/pdmenu
 chmod -R +x /loginvsi/bin/*
 chmod +x /usr/bin/loginvsid
 chown root:root /usr/bin/loginvsid
 
-echo "### Logging into docker... ###"
+echo "### Installing docker ###"
+yum update -y
+sh -c "$(curl -fsSL https://get.docker.com)"
+yum module remove -y container-tools
+
+yum remove -y docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
+
+yum install -y yum-utils
+
+#yum-config-manager \
+#    --add-repo \
+#    https://download.docker.com/linux/centos/docker-ce.repo
+
+#sed -i s/7/8/g /etc/yum.repos.d/docker-ce.repo
+subscription-manager repos --enable=rhel-7-server-extras-rpms
+yum install -y docker-ce docker-ce-cli containerd.io
+
+systemctl start docker
+systemctl enable docker
+
+echo "### Installing packages ###"
+curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+
+#echo "### Initiating docker swarm... ###"
+docker swarm init
+
+#echo "### Logging into docker... ###"
 #base64 -d < /root/.play | docker login -u vsiplayaccount --password-stdin
 
-echo "### Pulling LE4.4.9 images... ###"
-source /loginvsi/.env
-GATEWAY_PORT=443
-cd /loginvsi/
-docker-compose up -d
+#echo "### Pulling LE4.4.9 images... ###"
+#source /loginvsi/.env
+#GATEWAY_PORT=443
+#cd /loginvsi/
+#docker-compose up -d
 
-echo "### Stopping containers... ###"
-docker-compose down
+#echo "### Stopping containers... ###"
+#docker-compose down
+echo "Build Swapfile"
+sudo dd if=/dev/zero of=/swapfile count=4096 bs=1MB
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile swap swap defailts 0 0'|sudo tee -a /etc/fstab
 
 echo "### Performing factory reset - default admin credentials will be set ###"
 #This will have to be a manual edit
-sed -i 's/ec2_user:x:1000:1000:ec2_user:/home/ec2_user:/bin/bash/ec2_user:x:1000:1000:administrator,,,:/home/ec2_user:/usr/bin/startmenu' /etc/passwd
+#sed -i 's/ec2_user:x:1000:1000:ec2_user:/home/ec2_user:/bin/bash/ec2_user:x:1000:1000:administrator,,,:/home/ec2_user:/usr/bin/startmenu' /etc/passwd
 usermod -aG wheel ec2_user
-#/loginvsi/bin/menu/factoryreset
+/loginvsi/bin/menu/factoryreset
 
 function update_certs () {
   #Certificates - This section will have to be run after installation and configuration are complete
