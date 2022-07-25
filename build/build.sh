@@ -3,6 +3,8 @@ echo "----------------------------------------------------------------"
 echo "The script you are running has basename $( basename -- "$0"; ), dirname $( dirname -- "$0"; )";
 echo "The present working directory is $( pwd; )";
 echo "----------------------------------------------------------------"
+export WORK_DIR="$PWD"
+
 # Disk space check
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
 if [[ $FREE -lt 39062500 ]]; then               # 40G = 26*1024*1024k (Kibibyte)
@@ -84,7 +86,6 @@ fi
 # Copy Files and Directories to output dir
 build_out=$BUILD_DIR/$out_dir
 mkdir $build_out
-#sudo chmod 777 $build_out
 
 # Copy Login Enterprise Installation
 cp -r /mnt/vhd/loginvsi $build_out/
@@ -96,22 +97,19 @@ cp -f /mnt/vhd/etc/systemd/system/loginvsid.service $build_out/etc/systemd/syste
 #Copy Login Enterprise Service Watcher
 cp -f /mnt/vhd/etc/systemd/system/pi_guard.service $build_out/etc/systemd/system/pi_guard.service
 
-#Copy hidden files
-#mkdir -p $build_out/root
-#sudo cp -f /mnt/vhd/root/.play output/root/.play
-
 #Copy firstrun, daemon and Menuing
 mkdir -p $build_out/usr/bin
 cp -f /mnt/vhd/usr/bin/loginvsid $build_out/usr/bin/loginvsid
 cp -f /mnt/vhd/usr/bin/startmenu $build_out/usr/bin/startmenu
 curl -o $build_out/usr/bin/pdmenu https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
-#cp -f pdmenu $build_out/usr/bin/
 
 #zip up appliance build
 cd $build_out
 tar -czvf $out_dir.tar.gz *
-mv $out_dir.tar.gz
+#TODO: Move to working dir
+mv $out_dir.tar.gz $WORK_DIR
 
 #Unmount vhd
 sudo guestunmount /mnt/vhd
 unset BUILD_DIR
+unset WORK_DIR
