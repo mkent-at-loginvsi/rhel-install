@@ -103,11 +103,14 @@ cp -f /mnt/vhd/etc/systemd/system/pi_guard.service $build_out/etc/systemd/system
 #Copy firstrun, daemon and Menuing
 mkdir -p $build_out/usr/bin
 cp -f /mnt/vhd/usr/bin/loginvsid $build_out/usr/bin/loginvsid
+cp -f /mnt/vhd/usr/bin/startmenu $build_out/usr/bin/startmenu
 curl -o $build_out/usr/bin/pdmenu https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
 #cp -f pdmenu $build_out/usr/bin/
 
 #zip up appliance build
-tar -czvf $out_dir.tar.gz $build_out/*
+cd $build_out
+tar -czvf $out_dir.tar.gz *
+mv $out_dir.tar.gz
 
 #Unmount vhd
 sudo guestunmount /mnt/vhd
