@@ -99,10 +99,11 @@ echo "----------------------------------------------------------------"
 echo "Packaging Archive"
 echo "----------------------------------------------------------------"
 cd $BUILD_DIR
-tar -czvf $out_dir.tar.gz *
+tar -czvf "$OUTPUT_DIR/$out_dir.tar.gz" $out_dir
 #TODO: Move to working dir
-echo "mv -v $out_dir.tar.gz $OUTPUT_DIR"
-mv -v $out_dir.tar.gz $OUTPUT_DIR
+#echo "mv -v $out_dir.tar.gz $OUTPUT_DIR"
+#mv -v $out_dir.tar.gz $OUTPUT_DIR
+cd $WORK_DIR
 
 #Unmount vhd
 echo "----------------------------------------------------------------"
