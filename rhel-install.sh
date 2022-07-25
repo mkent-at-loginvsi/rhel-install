@@ -21,7 +21,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
-if [[ $FREE -lt 27262976 ]]; then               # 26G = 26*1024*1024k
+if [ $FREE -lt 27262976 ]; then               # 26G = 26*1024*1024k
      # less than 26GBs free!
      echo "----------------------------------------------------------------"
      echo "### The installation requires 26GB Free on the root partition (/) ###"
@@ -37,7 +37,7 @@ CPUS=`getconf _NPROCESSORS_ONLN`
 #    exit 1
 #fi
 
-#RAM=`sudo dmidecode -t 17 | grep "Size.*MB" | awk '{s+=$2} END {print s / 1024}'`
+RAM=`sudo dmidecode -t 17 | grep "Size.*MB" | awk '{s+=$2} END {print s / 1024}'`
 #if [[ $RAM != 4]]; then
 #    echo "----------------------------------------------------------------"
 #    echo "### WARNING: 4GB RAM Required! ###"
@@ -45,7 +45,7 @@ CPUS=`getconf _NPROCESSORS_ONLN`
 #    exit 1
 #fi
 
-#SUB=`sudo subscription-manager status | grep "Overall Status:*" | awk -F': ' '{print $2}'`
+SUB=`sudo subscription-manager status | grep "Overall Status:*" | awk -F': ' '{print $2}'`
 #if [[ $SUB != "Current"]]; then
 #    echo "----------------------------------------------------------------"
 #    echo "### WARNING: Red-Hat Subscription Required! ###"
