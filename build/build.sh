@@ -4,6 +4,7 @@ echo "The script you are running has basename $( basename -- "$0"; ), dirname $(
 echo "The present working directory is $( pwd; )";
 echo "----------------------------------------------------------------"
 export WORK_DIR="$PWD"
+export OUTPUT_DIR=$WORK_DIR/..
 
 # Disk space check
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
@@ -34,24 +35,11 @@ echo "----------------------------------------------------------------"
 echo "Downloading Virtual Appliance to $BUILD_DIR/$applianceFile"
 echo "----------------------------------------------------------------"
 
-# Shortcut for testing...if the appliance zip is one level up, copy it
-#if [ -f ../$BUILD_DIR/$applianceFile ]; then
-#  echo "copying ../$BUILD_DIR/$applianceFile"
-#  cp ../$BUILD_DIR/$applianceFile $BUILD_DIR
-#fi
-
-#if [ -f $applianceFile ]; then
-#  echo "copying $applianceFile"
-#  cp $applianceFile $BUILD_DIR
-#fi
-
 if ! [ -f $BUILD_DIR/$applianceFile ]; then
   curl -o $BUILD_DIR/$applianceFile https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile
 fi
 
-
 # Unzip VHD
-
 echo "----------------------------------------------------------------"
 echo "Unzipping Virtual Appliance VHD $BUILD_DIR/$applianceFile"
 echo "----------------------------------------------------------------"
@@ -84,6 +72,9 @@ if ! [ -d /mnt/vhd/loginvsi ]; then
 fi
 
 # Copy Files and Directories to output dir
+echo "----------------------------------------------------------------"
+echo "Copying Files to archive"
+echo "----------------------------------------------------------------"
 build_out=$BUILD_DIR/$out_dir
 mkdir $build_out
 
@@ -104,12 +95,24 @@ cp -f /mnt/vhd/usr/bin/startmenu $build_out/usr/bin/startmenu
 curl -o $build_out/usr/bin/pdmenu https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
 
 #zip up appliance build
-cd $build_out
+echo "----------------------------------------------------------------"
+echo "Packaging Archive"
+echo "----------------------------------------------------------------"
+cd $BUILD_DIR
 tar -czvf $out_dir.tar.gz *
 #TODO: Move to working dir
-mv $out_dir.tar.gz $WORK_DIR
+echo "mv -v $out_dir.tar.gz $OUTPUT_DIR"
+mv -v $out_dir.tar.gz $OUTPUT_DIR
 
 #Unmount vhd
+echo "----------------------------------------------------------------"
+echo "Cleaning up"
+echo "----------------------------------------------------------------"
 sudo guestunmount /mnt/vhd
 unset BUILD_DIR
 unset WORK_DIR
+unset OUTPUT_DIR
+
+echo "----------------------------------------------------------------"
+echo "Build Complete"
+echo "----------------------------------------------------------------"
