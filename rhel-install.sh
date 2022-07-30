@@ -66,6 +66,11 @@ echo "----------------------------------------------------------------"
 echo "### Create Admin Account ###"
 echo "----------------------------------------------------------------"
 #TODO: Create User admin, create group admin, assign admin user to groups: admin, sudo
+sudo adduser -m admin
+sudo usermod -aG wheel admin
+sudo usermod -aG sudo admin
+#sudo usermod -aG adm admin
+#sudo usermod -aG systemd-journal admin
 
 echo "----------------------------------------------------------------"
 echo "### Allow ssh Password Authentication ###"
@@ -95,7 +100,7 @@ chmod +x /usr/bin/loginvsid
 chown root:root /usr/bin/loginvsid
 
 echo "----------------------------------------------------------------"
-echo "### Installing docker ###"
+echo "### Uninstalling Docker ###"
 echo "----------------------------------------------------------------"
 yum update -y
 sh -c "$(curl -fsSL https://get.docker.com)"
@@ -120,11 +125,14 @@ yum install -y yum-utils
 subscription-manager repos --enable=rhel-7-server-extras-rpms
 yum install -y docker-ce docker-ce-cli containerd.io
 
+echo "----------------------------------------------------------------"
+echo "### Starting Docker ###"
+echo "----------------------------------------------------------------"
 systemctl start docker
 systemctl enable docker
 
 echo "----------------------------------------------------------------"
-echo "### Installing packages ###"
+echo "### Installing Docker Compose ###"
 echo "----------------------------------------------------------------"
 curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
@@ -134,20 +142,6 @@ echo "### Initiating docker swarm... ###"
 echo "----------------------------------------------------------------"
 docker swarm init
 
-#echo "### Logging into docker... ###"
-#base64 -d < /root/.play | docker login -u vsiplayaccount --password-stdin
-
-#echo "### Pulling LE4.4.9 images... ###"
-#source /loginvsi/.env
-#GATEWAY_PORT=443
-#cd /loginvsi/
-#docker-compose up -d
-
-#echo "### Stopping containers... ###"
-#docker-compose down
-
-
-
 echo "----------------------------------------------------------------"
 echo "### Performing factory reset - default admin credentials will be set ###"
 echo "----------------------------------------------------------------"
@@ -155,19 +149,3 @@ echo "----------------------------------------------------------------"
 #sed -i 's/ec2_user:x:1000:1000:ec2_user:/home/ec2_user:/bin/bash/ec2_user:x:1000:1000:administrator,,,:/home/ec2_user:/usr/bin/startmenu' /etc/passwd
 #usermod -aG wheel ec2_user
 #/loginvsi/bin/menu/factoryreset
-
-function update_certs () {
-  #Certificates - This section will have to be run after installation and configuration are complete
-  #To manage and install certificates you'll need to install the ca-certificates package and enable the dynamic CA configuration feature by issuing the command: update-ca-trust force enable.
-  yum install -y ca-certificates
-  update-ca-trust force enable
-
-  #To install your own root certificate in Red Hat or CentOS, copy or move the relevant root certificate into the following directory: /etc/pki/ca-trust/source/anchors/.
-  cp /certificates/CA.crt /etc/pki/ca-trust/source/anchors/
-
-  #After you have copied the certificate to the correct directory you will need to refresh the installed certificates and hashes. You can perform this with the following command: update-ca-trust extract.
-  update-ca-trust extract
-
-  #Once this has been performed, you will need to update the certificate store by running the following command: cert-sync /etc/pki/tls/certs/ca-bundle.crt.
-  update-ca-trust
-}
