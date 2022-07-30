@@ -6,9 +6,13 @@ echo "----------------------------------------------------------------"
 export WORK_DIR="$PWD"
 export OUTPUT_DIR=$WORK_DIR/..
 
+echo "----------------------------------------------------------------"
+echo "Install Archive will be written to $OUTPUT_DIR"
+echo "----------------------------------------------------------------"
+
 # Disk space check
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
-if [[ $FREE -lt 39062500 ]]; then               # 40G = 26*1024*1024k (Kibibyte)
+if [[ $FREE -lt 38990768 ]]; then               # 40G = 26*1024*1024k (Kibibyte)
      # less than 26GBs free!
      echo "----------------------------------------------------------------"
      echo "The installation requires 40GB Free on the root partition (/)"
@@ -99,9 +103,7 @@ echo "Packaging Archive"
 echo "----------------------------------------------------------------"
 cd $BUILD_DIR
 tar -czvf $out_dir.tar.gz $out_dir
-#TODO: Move to working dir
-#echo "mv -v $out_dir.tar.gz $OUTPUT_DIR"
-#mv -v $out_dir.tar.gz $OUTPUT_DIR
+mv -v $out_dir.tar.gz $OUTPUT_DIR
 cd $WORK_DIR
 
 #Unmount vhd
