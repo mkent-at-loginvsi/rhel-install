@@ -90,7 +90,9 @@ mountpath="$BUILD_DIR"
 LIBGUESTFS_BACKEND=direct
 export LIBGUESTFS_BACKEND
 
-guestmount --add $mountpath/AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
+if ! [ -d /mnt/vhd/loginvsi ]; then
+  guestmount --add $mountpath/AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
+fi
 
 # Fail if VHD doesn't exist
 echo "----------------------------------------------------------------"
