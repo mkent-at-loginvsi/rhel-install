@@ -85,9 +85,14 @@ mkdir $build_out
 # Copy Login Enterprise Installation
 cp -r /mnt/vhd/loginvsi $build_out/
 
-#Copy Login Enterprise Service
+# Copy Login Enterprise Service
 mkdir -p $build_out/etc/systemd/system/
 cp -f /mnt/vhd/etc/systemd/system/loginvsid.service $build_out/etc/systemd/system/loginvsid.service
+
+
+# Copy Docker Images
+#mkdir -p $build_out/var/lib/docker/
+cp -r /mnt/vhd/var/lib/docker/overlay2 $build_out/
 
 #Copy Login Enterprise Service Watcher
 cp -f /mnt/vhd/etc/systemd/system/pi_guard.service $build_out/etc/systemd/system/pi_guard.service
@@ -96,6 +101,8 @@ cp -f /mnt/vhd/etc/systemd/system/pi_guard.service $build_out/etc/systemd/system
 mkdir -p $build_out/usr/bin
 cp -f /mnt/vhd/usr/bin/loginvsid $build_out/usr/bin/loginvsid
 curl -o $build_out/usr/bin/pdmenu https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
+
+# Fix firstrun
 
 #zip up appliance build
 echo "----------------------------------------------------------------"
