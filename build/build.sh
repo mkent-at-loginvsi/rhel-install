@@ -120,8 +120,8 @@ mkdir -p $build_out/rpms
 cp -r $BUILD_DIR/*.rpm $buildout/rpms/
 
 # Copy Docker Images
-imageFile=Enterprise.4.5.11.images.tar
-mkdir -f $build_out/images/
+imageFile=images.tar.gz
+mkdir -p $build_out/images
 cp -r /media/iso/$imageFile $build_out/images/
 
 #Copy Login Enterprise Service Watcher
