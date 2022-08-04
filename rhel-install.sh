@@ -1,7 +1,5 @@
 #!/bin/bash
-temp_dir="/tmp/loginenterprise"
-
-#TODO: Expect appliance zip in rhel install dir
+temp_dir="/loginvsi/rhel-install"
 tar_file="appliance.tar.gz"
 
 # Need 2CPU
@@ -26,7 +24,7 @@ if [ $FREE -lt 27262976 ]; then               # 26G = 26*1024*1024k
      echo "----------------------------------------------------------------"
      echo "### The installation requires 26GB Free on the root partition (/) ###"
      echo "----------------------------------------------------------------"
-     #exit
+     exit 1
 fi
 
 CPUS=`getconf _NPROCESSORS_ONLN`
@@ -54,7 +52,7 @@ if [ $SUB != "Current" ]; then
 fi
 
 echo "----------------------------------------------------------------"
-echo "Build Swapfile"
+echo "### Build Swapfile ###"
 echo "----------------------------------------------------------------"
 sudo dd if=/dev/zero of=/swapfile count=4096 bs=1MB
 sudo chmod 600 /swapfile
@@ -65,20 +63,15 @@ echo '/swapfile swap swap defailts 0 0'|sudo tee -a /etc/fstab
 echo "----------------------------------------------------------------"
 echo "### Create Admin Account ###"
 echo "----------------------------------------------------------------"
-#TODO: Create User admin, create group admin, assign admin user to groups: admin, sudo
 sudo adduser -m admin
 sudo usermod -aG wheel admin
 sudo usermod -aG sudo admin
-#sudo usermod -aG adm admin
-#sudo usermod -aG systemd-journal admin
 
 echo "----------------------------------------------------------------"
 echo "### Allow ssh Password Authentication ###"
 echo "----------------------------------------------------------------"
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 systemctl restart sshd
-
-#curl http://upload.loginvsi.com/Support/le449.clean.install.tar.gz -O /tmp/le449.clean.install.tar.gz
 
 echo "----------------------------------------------------------------"
 echo "### Unzipping arhive and installing files ###"
@@ -116,14 +109,12 @@ yum remove -y docker \
                   docker-engine
 
 yum install -y yum-utils
-
-#yum-config-manager \
-#    --add-repo \
-#    https://download.docker.com/linux/centos/docker-ce.repo
-
-#sed -i s/7/8/g /etc/yum.repos.d/docker-ce.repo
+#Install packages
+rpm -ivh --nodeps $temp_dir/appliance/*.rpm
 subscription-manager repos --enable=rhel-7-server-extras-rpms
 yum install -y docker-ce docker-ce-cli containerd.io
+
+
 
 echo "----------------------------------------------------------------"
 echo "### Starting Docker ###"
@@ -145,7 +136,10 @@ docker swarm init
 echo "----------------------------------------------------------------"
 echo "### Performing factory reset - default admin credentials will be set ###"
 echo "----------------------------------------------------------------"
-#This will have to be a manual edit
-#sed -i 's/ec2_user:x:1000:1000:ec2_user:/home/ec2_user:/bin/bash/ec2_user:x:1000:1000:administrator,,,:/home/ec2_user:/usr/bin/startmenu' /etc/passwd
-#usermod -aG wheel ec2_user
-#/loginvsi/bin/menu/factoryreset
+# Load Images? Yes Images are missing except for db
+docker load -i $temp_dir/appliance/images/*
+
+#/loginvsi/bin/firstrun
+# login as admin to complete install
+
+# fix certs
