@@ -36,9 +36,11 @@ echo "----------------------------------------------------------------"
 # Download pdmenu for rhel/centos
 pdmenuSourceUrl="https://download.opensuse.org/repositories/shells/CentOS_5/x86_64/pdmenu-1.3.2-3.2.x86_64.rpm"
 echo "----------------------------------------------------------------"
-echo "Downloading PDMenu to $BUILD_DIR/rpms"
+echo "Downloading pdmenu to $BUILD_DIR/rpms"
 echo "----------------------------------------------------------------"
-sudo curl -L -O $pdmenuSourceUrl
+cd $BUILD_DIR
+curl -L -O $pdmenuSourceUrl
+cd ..
 
 # Download ISO
 isoFile="LoginEnterprise-4.8.10.iso"
