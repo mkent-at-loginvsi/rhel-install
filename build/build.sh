@@ -33,6 +33,30 @@ echo "Relative Build Direcory: $dir"
 echo "Full Path Build Directory: $BUILD_DIR"
 echo "----------------------------------------------------------------"
 
+# Download pdmenu for rhel/centos
+pdmenuSourceUrl="https://download.opensuse.org/repositories/shells/CentOS_5/x86_64/pdmenu-1.3.2-3.2.x86_64.rpm"
+echo "----------------------------------------------------------------"
+echo "Downloading PDMenu to $BUILD_DIR/rpms"
+echo "----------------------------------------------------------------"
+curl -o $BUILD_DIR/$pdmenuSourceUrl
+
+# Download ISO
+isoFile="LoginEnterprise-4.8.10.iso"
+echo "----------------------------------------------------------------"
+echo "Downloading Update ISO to $BUILD_DIR/$isoFile"
+echo "----------------------------------------------------------------"
+
+if ! [ -f $BUILD_DIR/$isoFile ]; then
+  curl -o $BUILD_DIR/$isoFile https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginPI3_ISO/publicS/$isoFile
+fi
+
+# Mount ISO
+echo "----------------------------------------------------------------"
+echo "Mounting Update ISO"
+echo "----------------------------------------------------------------"
+sudo mkdir /media/iso
+sudo mount $BUILD_DIR/$isoFile /media/iso -o loop
+
 # Download Appliance VHD zip
 applianceFile="AZ-VA-LoginEnterprise-4.8.10.zip"
 echo "----------------------------------------------------------------"
@@ -89,10 +113,14 @@ cp -r /mnt/vhd/loginvsi $build_out/
 mkdir -p $build_out/etc/systemd/system/
 cp -f /mnt/vhd/etc/systemd/system/loginvsid.service $build_out/etc/systemd/system/loginvsid.service
 
+# Copy rpms
+mkdir -p $build_out/rpms
+cp -r $BUILD_DIR/*.rpm $buildout/rpms/
 
 # Copy Docker Images
-#mkdir -p $build_out/var/lib/docker/
-cp -r /mnt/vhd/var/lib/docker/overlay2 $build_out/
+imageFile=Enterprise.4.5.11.images.tar
+mkdir -f $build_out/images/
+cp -r /media/iso/$imageFile $build_out/images/
 
 #Copy Login Enterprise Service Watcher
 cp -f /mnt/vhd/etc/systemd/system/pi_guard.service $build_out/etc/systemd/system/pi_guard.service
