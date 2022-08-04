@@ -38,7 +38,7 @@ pdmenuSourceUrl="https://download.opensuse.org/repositories/shells/CentOS_5/x86_
 echo "----------------------------------------------------------------"
 echo "Downloading PDMenu to $BUILD_DIR/rpms"
 echo "----------------------------------------------------------------"
-curl -o $BUILD_DIR/$pdmenuSourceUrl
+sudo curl -L -O $pdmenuSourceUrl
 
 # Download ISO
 isoFile="LoginEnterprise-4.8.10.iso"
