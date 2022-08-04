@@ -120,7 +120,7 @@ mkdir -p $build_out/rpms
 cp -r $BUILD_DIR/*.rpm $build_out/rpms/
 
 # Copy Docker Images
-imageFile=images.tar.gz
+imageFile="images.tar.gz"
 mkdir -p $build_out/images
 cp -r /media/iso/$imageFile $build_out/images/
 
