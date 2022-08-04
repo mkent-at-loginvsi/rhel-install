@@ -117,7 +117,7 @@ cp -f /mnt/vhd/etc/systemd/system/loginvsid.service $build_out/etc/systemd/syste
 
 # Copy rpms
 mkdir -p $build_out/rpms
-cp -r $BUILD_DIR/*.rpm $buildout/rpms/
+cp -r $BUILD_DIR/*.rpm $build_out/rpms/
 
 # Copy Docker Images
 imageFile=images.tar.gz
@@ -147,8 +147,8 @@ cd $WORK_DIR
 echo "----------------------------------------------------------------"
 echo "Cleaning up"
 echo "----------------------------------------------------------------"
-sudo guestunmount /mnt/vhd
-sh clean.sh
+#sudo guestunmount /mnt/vhd
+#sh clean.sh
 unset BUILD_DIR
 unset WORK_DIR
 unset OUTPUT_DIR
