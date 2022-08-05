@@ -49,15 +49,30 @@ echo "Downloading Update ISO to $BUILD_DIR/$isoFile"
 echo "----------------------------------------------------------------"
 
 if ! [ -f $BUILD_DIR/$isoFile ]; then
-  curl -o $BUILD_DIR/$isoFile https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginPI3_ISO/publicS/$isoFile
+  curl -o $BUILD_DIR/$isoFile https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginPI3_ISO/public/$isoFile
 fi
 
 # Mount ISO
 echo "----------------------------------------------------------------"
-echo "Mounting Update ISO"
+echo "Check if ISO is mounted"
 echo "----------------------------------------------------------------"
-sudo mkdir /media/iso
-sudo mount $BUILD_DIR/$isoFile /media/iso -o loop
+if ! [ -d /media/iso ]; then
+  sudo mkdir /media/iso
+fi
+
+if ! [ -d /media/iso/update ]; then
+  sudo mount $BUILD_DIR/$isoFile /media/iso -o loop
+fi
+
+
+# Fail if VHD doesn't exist
+echo "----------------------------------------------------------------"
+echo "Checking if VHD Mounted"
+echo "----------------------------------------------------------------"
+if ! [ -d /mnt/vhd/loginvsi ]; then
+  echo "Mount failed"
+  exit 1
+fi
 
 # Download Appliance VHD zip
 applianceFile="AZ-VA-LoginEnterprise-4.8.10.zip"
@@ -150,6 +165,7 @@ echo "----------------------------------------------------------------"
 echo "Cleaning up"
 echo "----------------------------------------------------------------"
 #sudo guestunmount /mnt/vhd
+#sudo umount /media/iso
 #sh clean.sh
 unset BUILD_DIR
 unset WORK_DIR
