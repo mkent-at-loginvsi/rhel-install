@@ -141,9 +141,8 @@ docker swarm init
 docker load -i $temp_dir/appliance/images/*
 
 echo "----------------------------------------------------------------"
-echo "### Performing first run - default admin credentials will be set ###"
+echo "### Perform first run manually - default admin credentials will be set ###"
+echo "as root:"
+echo "sh /loginvsi/bin/firstrun"
+echo "after reboot, reconnect as admin and the installer will finish"
 echo "----------------------------------------------------------------"
-# Load Images? Yes Images are missing except for db
-docker load -i $temp_dir/appliance/images/*
-
-sh /loginvsi/bin/firstrun
