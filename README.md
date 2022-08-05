@@ -29,3 +29,8 @@ Change Directory into the rhel-install/build directory and run "sh build.sh". Th
 Remember the build can be run on any system and produces an artifact for the install. If you need to run the build outside of a secure environment, be sure to copy the appliance.tar.gz to the candidate system to run the install.
 
 # Running the install
+The build process will produce an "appliance.tar.gz" file. The rhel-installer expects to find that file in the same directory as the installer. run the rhel-install script as root. This script will create an admin account and install docker and other dependent libs, unzip the loginvsi files to the appropriate directories, load the docker images and complete.
+
+Once that installer is complete, you will run the firstrun script as root. This will ask questions, ask you to set the admin password, set a script to run at login for the admin account, and finally reboot the appliance.
+
+Now connect with the admin account and password you specified, and the appliance will complete its install and reboot again. At this point the appliance is ready (once the reboot is complete and the loginvsi services are running). This can take a few minutes.
