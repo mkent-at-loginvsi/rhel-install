@@ -64,12 +64,11 @@ if ! [ -d /media/iso/update ]; then
   sudo mount $BUILD_DIR/$isoFile /media/iso -o loop
 fi
 
-
-# Fail if VHD doesn't exist
+# Fail if ISO doesn't exist
 echo "----------------------------------------------------------------"
-echo "Checking if VHD Mounted"
+echo "Checking if ISO Mounted"
 echo "----------------------------------------------------------------"
-if ! [ -d /mnt/vhd/loginvsi ]; then
+if ! [ -d media/iso/update ]; then
   echo "Mount failed"
   exit 1
 fi
