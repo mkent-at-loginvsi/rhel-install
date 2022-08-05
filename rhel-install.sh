@@ -1,5 +1,5 @@
 #!/bin/bash
-temp_dir="/loginvsi/rhel-install"
+temp_dir="/install/rhel-install"
 tar_file="appliance.tar.gz"
 
 # Need 2CPU
@@ -80,7 +80,6 @@ mkdir $temp_dir
 tar -zxvf $tar_file -C $temp_dir
 cp -R $temp_dir/appliance/loginvsi /
 cp -R $temp_dir/appliance/usr /
-cp -R $temp_dir/appliance/root /
 cp -f $temp_dir/appliance/etc/systemd/system/loginvsid.service /etc/systemd/system/
 cp -f $temp_dir/appliance/etc/systemd/system/pi_guard.service /etc/systemd/system/
 systemctl enable pi_guard
@@ -95,7 +94,7 @@ chown root:root /usr/bin/loginvsid
 echo "----------------------------------------------------------------"
 echo "### Uninstalling Docker ###"
 echo "----------------------------------------------------------------"
-yum update -y
+#yum update -y
 sh -c "$(curl -fsSL https://get.docker.com)"
 yum module remove -y container-tools
 
@@ -111,16 +110,23 @@ yum remove -y docker \
 yum install -y yum-utils
 #Install packages
 rpm -ivh --nodeps $temp_dir/appliance/*.rpm
-subscription-manager repos --enable=rhel-7-server-extras-rpms
+#subscription-manager repos --enable=rhel-7-server-extras-rpms
+sudo subscription-manager repos --enable=rhel-7-server-rpms \
+  --enable=rhel-7-server-extras-rpms \
+  --enable=rhel-7-server-optional-rpms
+sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+#sudo yum install -y device-mapper-persistent-data lvm2
+
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
 yum install -y docker-ce docker-ce-cli containerd.io
-
-
 
 echo "----------------------------------------------------------------"
 echo "### Starting Docker ###"
 echo "----------------------------------------------------------------"
 systemctl start docker
 systemctl enable docker
+
 
 echo "----------------------------------------------------------------"
 echo "### Installing Docker Compose ###"
@@ -132,14 +138,12 @@ echo "----------------------------------------------------------------"
 echo "### Initiating docker swarm... ###"
 echo "----------------------------------------------------------------"
 docker swarm init
+docker load -i $temp_dir/appliance/images/*
 
 echo "----------------------------------------------------------------"
-echo "### Performing factory reset - default admin credentials will be set ###"
+echo "### Performing first run - default admin credentials will be set ###"
 echo "----------------------------------------------------------------"
 # Load Images? Yes Images are missing except for db
 docker load -i $temp_dir/appliance/images/*
 
-#/loginvsi/bin/firstrun
-# login as admin to complete install
-
-# fix certs
+sh /loginvsi/bin/firstrun
