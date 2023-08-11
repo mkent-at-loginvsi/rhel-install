@@ -71,46 +71,20 @@ mkswap /swapfile
 swapon /swapfile
 echo '/swapfile swap swap defailts 0 0'| tee -a /etc/fstab
 
-$usercheck = $(id -u admin)
-if [ $usercheck -eq 0 ]; then
+admincheck=$(id -u admin)
+if [ $admincheck ]; then
      echo "----------------------------------------------------------------"
      echo "### WARNING: Admin user already exists! ###"
      echo "----------------------------------------------------------------"
+     usermod -aG wheel admin sudo
 else
      echo "----------------------------------------------------------------"
      echo "### Create Admin Account ###"
      echo "----------------------------------------------------------------"
      adduser -m admin
-     usermod -aG wheel admin
-     usermod -aG sudo admin
+     usermod -aG wheel admin sudo
+     #usermod -aG sudo admin
 fi
-
-for group in docker loginvsi; do
-     $usercheck = $(id -u admin)
-     if [ $usercheck -eq 0 ]; then
-          echo "----------------------------------------------------------------"
-          echo "### WARNING: Admin user already exists! ###"
-          echo "----------------------------------------------------------------"
-     else
-          echo "----------------------------------------------------------------"
-          echo "### Create Admin Account ###"
-          echo "----------------------------------------------------------------"
-          adduser -m admin
-          usermod -aG wheel admin
-          usermod -aG sudo admin
-     fi
-     $useringroup = $(id -nG admin | grep $group)
-     if [ $useringroup -eq 0 ]; then
-          echo "----------------------------------------------------------------"
-          echo "### WARNING: Admin user already in $group group! ###"
-          echo "----------------------------------------------------------------"
-     else
-          echo "----------------------------------------------------------------"
-          echo "### Add Admin user to $group group ###"
-          echo "----------------------------------------------------------------"
-          usermod -aG $group admin
-     fi
-done
 
 groupcheck=$(getent group loginenterprise | cut -d: -f1)
 gidcheck=$(getent group 1002 | cut -d: -f1)
@@ -155,8 +129,8 @@ sysctlEntries=(
 echo "sysctl entries: ${sysctlEntries[@]}"
 
 for str in ${sysctlEntries[@]}; do
-     sysctl -w $str=1
-     grep -qF "$str" "/etc/sysctl.conf" ||  echo "$str" | tee -a "/etc/sysctl.conf"
+     # sysctl -w $str=1
+     grep -qF "$str" "/etc/sysctl.conf" || echo "$str" | tee -a "/etc/sysctl.conf"
 done
 echo "committing sysctl changes"
 sysctl -p
