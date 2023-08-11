@@ -11,11 +11,24 @@ echo "----------------------------------------------------------------"
 echo "### Checking Pre-Reqs ###"
 echo "----------------------------------------------------------------"
 
+SELINUXSTATUS=$(getenforce)
+if [ $SELINUXSTATUS != "Disabled" ]; then
+     echo "----------------------------------------------------------------"
+     echo "### WARNING: SELinux must be disabled! ###"
+     echo "----------------------------------------------------------------"
+     exit 1
+fi
+
 if [ $EUID -ne 0 ]; then
    echo "----------------------------------------------------------------"
    echo "### This script must be run as root ###"
    echo "----------------------------------------------------------------"
-   exit 1
+fi
+
+if [ $EUID -ne 0 ]; then
+   echo "----------------------------------------------------------------"
+   echo "### This script must be run as root ###"
+   echo "----------------------------------------------------------------"
 fi
 
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
@@ -60,12 +73,74 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 echo '/swapfile swap swap defailts 0 0'|sudo tee -a /etc/fstab
 
-echo "----------------------------------------------------------------"
-echo "### Create Admin Account ###"
-echo "----------------------------------------------------------------"
-sudo adduser -m admin
-sudo usermod -aG wheel admin
-sudo usermod -aG sudo admin
+#TODO: else 
+$usercheck = $(id -u admin)
+if [ $usercheck -eq 0 ]; then
+     echo "----------------------------------------------------------------"
+     echo "### WARNING: Admin user already exists! ###"
+     echo "----------------------------------------------------------------"
+else
+     echo "----------------------------------------------------------------"
+     echo "### Create Admin Account ###"
+     echo "----------------------------------------------------------------"
+     sudo adduser -m admin
+     sudo usermod -aG wheel admin
+     sudo usermod -aG sudo admin
+fi
+
+# for a list of groups, check if user is in group
+# if not, add user to group
+# if group does not exist, create group and add user to group
+for group in docker loginvsi; do
+     # $groupcheck = $(getent group $group)
+     # if [ $groupcheck -eq 0 ]; then
+     #      echo "----------------------------------------------------------------"
+     #      echo "### WARNING: $group group already exists! ###"
+     #      echo "----------------------------------------------------------------"
+     # else
+     #      echo "----------------------------------------------------------------"
+     #      echo "### Create $group group ###"
+     #      echo "----------------------------------------------------------------"
+     #      sudo groupadd $group
+     # fi
+     $usercheck = $(id -u admin)
+     if [ $usercheck -eq 0 ]; then
+          echo "----------------------------------------------------------------"
+          echo "### WARNING: Admin user already exists! ###"
+          echo "----------------------------------------------------------------"
+     else
+          echo "----------------------------------------------------------------"
+          echo "### Create Admin Account ###"
+          echo "----------------------------------------------------------------"
+          sudo adduser -m admin
+          sudo usermod -aG wheel admin
+          sudo usermod -aG sudo admin
+     fi
+     $useringroup = $(id -nG admin | grep $group)
+     if [ $useringroup -eq 0 ]; then
+          echo "----------------------------------------------------------------"
+          echo "### WARNING: Admin user already in $group group! ###"
+          echo "----------------------------------------------------------------"
+     else
+          echo "----------------------------------------------------------------"
+          echo "### Add Admin user to $group group ###"
+          echo "----------------------------------------------------------------"
+          sudo usermod -aG $group admin
+     fi
+done
+
+$groupcheck = $(getent group loginenterprise)
+if [ $groupcheck -eq 0 ]; then
+     echo "----------------------------------------------------------------"
+     echo "### WARNING: loginvsi group already exists! ###"
+     echo "----------------------------------------------------------------"
+     exit 1
+else
+     echo "----------------------------------------------------------------"
+     echo "### Create loginvsi group ###"
+     echo "----------------------------------------------------------------"
+     sudo groupadd loginvsi
+fi
 
 echo "----------------------------------------------------------------"
 echo "### Allow ssh Password Authentication ###"
@@ -142,7 +217,7 @@ docker load -i $temp_dir/appliance/images/*
 
 echo "----------------------------------------------------------------"
 echo "### Perform first run manually - default admin credentials will be set ###"
-echo "as root:"
+echo "as admin:"
 echo "sh /loginvsi/bin/firstrun"
 echo "after reboot, reconnect as admin and the installer will finish"
 echo "----------------------------------------------------------------"
