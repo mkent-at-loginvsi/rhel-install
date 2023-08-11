@@ -111,17 +111,18 @@ for group in docker loginvsi; do
      fi
 done
 
-$groupcheck = $(getent group loginenterprise)
-if [ $groupcheck -eq 0 ]; then
+groupcheck=$(getent group loginenterprise | cut -d: -f1)
+gidcheck=$(getent group 1002 | cut -d: -f1)
+
+if [ $groupcheck ] && [ $gidcheck ]; then
      echo "----------------------------------------------------------------"
-     echo "### WARNING: loginvsi group already exists! ###"
+     echo "### WARNING: loginenterprise group already exists! ###"
      echo "----------------------------------------------------------------"
-     exit 1
 else
      echo "----------------------------------------------------------------"
-     echo "### Create loginvsi group ###"
+     echo "### Create loginenterprise group ###"
      echo "----------------------------------------------------------------"
-     sudo groupadd loginvsi
+     sudo groupadd -g 1002 loginenterprise
 fi
 
 if [ -f /etc/sysctl.conf ]; then
