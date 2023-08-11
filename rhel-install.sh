@@ -76,14 +76,13 @@ if [ $admincheck ]; then
      echo "----------------------------------------------------------------"
      echo "### WARNING: Admin user already exists! ###"
      echo "----------------------------------------------------------------"
-     usermod -aG wheel admin sudo
+     usermod -aG wheel,sudo admin
 else
      echo "----------------------------------------------------------------"
      echo "### Create Admin Account ###"
      echo "----------------------------------------------------------------"
      adduser -m admin
-     usermod -aG wheel admin sudo
-     #usermod -aG sudo admin
+     usermod -aG wheel,sudo admin
 fi
 
 groupcheck=$(getent group loginenterprise | cut -d: -f1)
