@@ -22,11 +22,11 @@ if [ $SELINUXSTATUS != "Disabled" ]; then
      exit 1
 fi
 
-# if [ $EUID -ne 0 ]; then
-#    echo "----------------------------------------------------------------"
-#    echo "### This script must be run as root ###"
-#    echo "----------------------------------------------------------------"
-# fi
+if [ $EUID -ne 0 ]; then
+   echo "----------------------------------------------------------------"
+   echo "### This script must be run as root ###"
+   echo "----------------------------------------------------------------"
+fi
 
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
 if [ $FREE -lt 27262976 ]; then               # 26G = 26*1024*1024k
@@ -70,7 +70,6 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 echo '/swapfile swap swap defailts 0 0'|sudo tee -a /etc/fstab
 
-#TODO: else 
 $usercheck = $(id -u admin)
 if [ $usercheck -eq 0 ]; then
      echo "----------------------------------------------------------------"
@@ -85,21 +84,7 @@ else
      sudo usermod -aG sudo admin
 fi
 
-# for a list of groups, check if user is in group
-# if not, add user to group
-# if group does not exist, create group and add user to group
 for group in docker loginvsi; do
-     # $groupcheck = $(getent group $group)
-     # if [ $groupcheck -eq 0 ]; then
-     #      echo "----------------------------------------------------------------"
-     #      echo "### WARNING: $group group already exists! ###"
-     #      echo "----------------------------------------------------------------"
-     # else
-     #      echo "----------------------------------------------------------------"
-     #      echo "### Create $group group ###"
-     #      echo "----------------------------------------------------------------"
-     #      sudo groupadd $group
-     # fi
      $usercheck = $(id -u admin)
      if [ $usercheck -eq 0 ]; then
           echo "----------------------------------------------------------------"
@@ -138,6 +123,41 @@ else
      echo "----------------------------------------------------------------"
      sudo groupadd loginvsi
 fi
+
+if [ -f /etc/sysctl.conf ]; then
+     echo "----------------------------------------------------------------"
+     echo "### /etc/sysctl.conf already exists! ###"
+     echo "----------------------------------------------------------------"
+     exit 1
+else
+     echo "----------------------------------------------------------------"
+     echo "### Create /etc/sysctl.conf ###"
+     echo "----------------------------------------------------------------"
+     sudo touch /etc/sysctl.conf
+fi
+
+echo "----------------------------------------------------------------"
+echo "### Add Entries to sysctl ###"
+echo "----------------------------------------------------------------"
+sysctlEntries=(
+     "net.ipv4.conf.all.accept_redirects = 0"
+     "net.ipv4.conf.all.secure_redirects = 0"
+     "net.ipv4.conf.all.send_redirects = 0"
+     "net.ipv4.conf.default.accept_redirects = 0"
+     "net.ipv4.conf.default.secure_redirects = 0"
+     "net.ipv4.conf.default.send_redirects = 0"
+     "net.ipv6.conf.all.accept_redirects = 0"
+     "net.ipv6.conf.default.accept_redirects = 0"
+     "net.ipv4.ip_forward = 1"
+     )
+echo "sysctl entries: ${sysctlEntries[@]}"
+
+for str in ${sysctlEntries[@]}; do
+     sysctl -w $str=1
+     grep -qF "$str" "/etc/sysctl.conf" ||  echo "$str" | sudo tee -a "/etc/sysctl.conf"
+done
+echo "committing sysctl changes"
+sysctl -p
 
 echo "----------------------------------------------------------------"
 echo "### Allow ssh Password Authentication ###"
