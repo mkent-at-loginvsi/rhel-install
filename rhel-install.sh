@@ -25,12 +25,6 @@ if [ $EUID -ne 0 ]; then
    echo "----------------------------------------------------------------"
 fi
 
-if [ $EUID -ne 0 ]; then
-   echo "----------------------------------------------------------------"
-   echo "### This script must be run as root ###"
-   echo "----------------------------------------------------------------"
-fi
-
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
 if [ $FREE -lt 27262976 ]; then               # 26G = 26*1024*1024k
      # less than 26GBs free!
