@@ -46,7 +46,7 @@ if [ $CPUS -lt 2 ]; then
      exit 1
 fi
 
-RAM=`sudo dmidecode -t 17 | grep "Size.*MB" | awk '{s+=$2} END {print s / 1024}' | awk -F'.' '{print $1}'`
+RAM=`dmidecode -t 17 | grep "Size.*MB" | awk '{s+=$2} END {print s / 1024}' | awk -F'.' '{print $1}'`
 if [ $RAM -lt 4 ]; then
      echo "----------------------------------------------------------------"
      echo "### WARNING: 4GB RAM Required! ###"
@@ -54,7 +54,7 @@ if [ $RAM -lt 4 ]; then
      exit 1
 fi
 
-SUB=`sudo subscription-manager status | grep "Overall Status:*" | awk -F': ' '{print $2}'`
+SUB=`subscription-manager status | grep "Overall Status:*" | awk -F': ' '{print $2}'`
 if [ $SUB != "Current" ]; then
      echo "----------------------------------------------------------------"
      echo "### WARNING: Red-Hat Subscription Required! ###"
@@ -65,11 +65,11 @@ fi
 echo "----------------------------------------------------------------"
 echo "### Build Swapfile ###"
 echo "----------------------------------------------------------------"
-sudo dd if=/dev/zero of=/swapfile count=4096 bs=1MB
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-echo '/swapfile swap swap defailts 0 0'|sudo tee -a /etc/fstab
+dd if=/dev/zero of=/swapfile count=4096 bs=1MB
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile swap swap defailts 0 0'| tee -a /etc/fstab
 
 $usercheck = $(id -u admin)
 if [ $usercheck -eq 0 ]; then
@@ -80,9 +80,9 @@ else
      echo "----------------------------------------------------------------"
      echo "### Create Admin Account ###"
      echo "----------------------------------------------------------------"
-     sudo adduser -m admin
-     sudo usermod -aG wheel admin
-     sudo usermod -aG sudo admin
+     adduser -m admin
+     usermod -aG wheel admin
+     usermod -aG sudo admin
 fi
 
 for group in docker loginvsi; do
@@ -95,9 +95,9 @@ for group in docker loginvsi; do
           echo "----------------------------------------------------------------"
           echo "### Create Admin Account ###"
           echo "----------------------------------------------------------------"
-          sudo adduser -m admin
-          sudo usermod -aG wheel admin
-          sudo usermod -aG sudo admin
+          adduser -m admin
+          usermod -aG wheel admin
+          usermod -aG sudo admin
      fi
      $useringroup = $(id -nG admin | grep $group)
      if [ $useringroup -eq 0 ]; then
@@ -108,7 +108,7 @@ for group in docker loginvsi; do
           echo "----------------------------------------------------------------"
           echo "### Add Admin user to $group group ###"
           echo "----------------------------------------------------------------"
-          sudo usermod -aG $group admin
+          usermod -aG $group admin
      fi
 done
 
@@ -123,7 +123,7 @@ else
      echo "----------------------------------------------------------------"
      echo "### Create loginenterprise group ###"
      echo "----------------------------------------------------------------"
-     sudo groupadd -g 1002 loginenterprise
+     groupadd -g 1002 loginenterprise
 fi
 
 if [ -f /etc/sysctl.conf ]; then
@@ -135,7 +135,7 @@ else
      echo "----------------------------------------------------------------"
      echo "### Create /etc/sysctl.conf ###"
      echo "----------------------------------------------------------------"
-     sudo touch /etc/sysctl.conf
+     touch /etc/sysctl.conf
 fi
 
 echo "----------------------------------------------------------------"
@@ -156,7 +156,7 @@ echo "sysctl entries: ${sysctlEntries[@]}"
 
 for str in ${sysctlEntries[@]}; do
      sysctl -w $str=1
-     grep -qF "$str" "/etc/sysctl.conf" ||  echo "$str" | sudo tee -a "/etc/sysctl.conf"
+     grep -qF "$str" "/etc/sysctl.conf" ||  echo "$str" | tee -a "/etc/sysctl.conf"
 done
 echo "committing sysctl changes"
 sysctl -p
@@ -188,7 +188,8 @@ chown root:root /usr/bin/loginvsid
 echo "----------------------------------------------------------------"
 echo "### Uninstalling Docker ###"
 echo "----------------------------------------------------------------"
-#yum update -y
+yum update -y
+
 sh -c "$(curl -fsSL https://get.docker.com)"
 yum module remove -y container-tools
 
@@ -202,16 +203,18 @@ yum remove -y docker \
                   docker-engine
 
 yum install -y yum-utils
+
 #Install packages
 rpm -ivh --nodeps $temp_dir/appliance/*.rpm
+
 #subscription-manager repos --enable=rhel-7-server-extras-rpms
-sudo subscription-manager repos --enable=rhel-7-server-rpms \
+subscription-manager repos --enable=rhel-7-server-rpms \
   --enable=rhel-7-server-extras-rpms \
   --enable=rhel-7-server-optional-rpms
-sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-#sudo yum install -y device-mapper-persistent-data lvm2
+yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
-sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
 yum install -y docker-ce docker-ce-cli containerd.io
 
