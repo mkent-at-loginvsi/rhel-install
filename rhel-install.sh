@@ -6,6 +6,9 @@ tar_file="appliance.tar.gz"
 # Need 4GB RAM
 # Need 25 GB Free Space
 # Need RHEL subscription
+echo "----------------------------------------------------------------"
+echo "### Running Installer as: $SUDO_USER ###"
+echo "----------------------------------------------------------------"
 
 echo "----------------------------------------------------------------"
 echo "### Checking Pre-Reqs ###"
@@ -19,11 +22,11 @@ if [ $SELINUXSTATUS != "Disabled" ]; then
      exit 1
 fi
 
-if [ $EUID -ne 0 ]; then
-   echo "----------------------------------------------------------------"
-   echo "### This script must be run as root ###"
-   echo "----------------------------------------------------------------"
-fi
+# if [ $EUID -ne 0 ]; then
+#    echo "----------------------------------------------------------------"
+#    echo "### This script must be run as root ###"
+#    echo "----------------------------------------------------------------"
+# fi
 
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
 if [ $FREE -lt 27262976 ]; then               # 26G = 26*1024*1024k
