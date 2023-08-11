@@ -26,6 +26,7 @@ if [ $EUID -ne 0 ]; then
    echo "----------------------------------------------------------------"
    echo "### This script must be run as root ###"
    echo "----------------------------------------------------------------"
+   exit 1
 fi
 
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
