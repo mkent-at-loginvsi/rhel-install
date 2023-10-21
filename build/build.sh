@@ -1,4 +1,11 @@
 #!/bin/bash
+while getopts r: flag
+do
+  case "${flag}" in 
+    r) resumedir=${OPTARG};;
+  esac
+done 
+
 echo "----------------------------------------------------------------"
 echo "The script you are running has basename $( basename -- "$0"; ), dirname $( dirname -- "$0"; )";
 echo "The present working directory is $( pwd; )";
@@ -9,10 +16,9 @@ export OUTPUT_DIR=$WORK_DIR/..
 echo "----------------------------------------------------------------"
 echo "Install Archive will be written to $OUTPUT_DIR"
 echo "----------------------------------------------------------------"
-
 # Disk space check
 FREE=`df -k / --output=avail "$PWD" | tail -n1`   # df -k not df -h
-if [[ $FREE -lt 38990768 ]]; then               # 40G = 26*1024*1024k (Kibibyte)
+if [ $FREE -lt 38990768 ]; then               # 40G = 26*1024*1024k (Kibibyte)
      # less than 26GBs free!
      echo "----------------------------------------------------------------"
      echo "The installation requires 40GB Free on the root partition (/)"
@@ -20,6 +26,13 @@ if [[ $FREE -lt 38990768 ]]; then               # 40G = 26*1024*1024k (Kibibyte)
      #exit
 fi
 
+echo "----------------------------------------------------------------"
+echo "### Install Packages ###"
+echo "----------------------------------------------------------------"
+yum update -qq -y
+yum install -y unzip libguestfs-tools
+
+if [ -z "$resumedir" ]; then
 # Create Build Directory
 echo "----------------------------------------------------------------"
 echo "Creating Build Directory"
@@ -27,23 +40,29 @@ echo "----------------------------------------------------------------"
 dir="build-$(date +%Y_%m_%d_%H_%M_%S)"
 export BUILD_DIR="$PWD/$dir"
 out_dir="appliance"
+
 mkdir $dir
 echo "----------------------------------------------------------------"
 echo "Relative Build Direcory: $dir"
 echo "Full Path Build Directory: $BUILD_DIR"
 echo "----------------------------------------------------------------"
+else
 
-# Download pdmenu for rhel/centos
-pdmenuSourceUrl="https://download.opensuse.org/repositories/shells/CentOS_5/x86_64/pdmenu-1.3.2-3.2.x86_64.rpm"
+# Resume Build, Set Build Directory
 echo "----------------------------------------------------------------"
-echo "Downloading pdmenu to $BUILD_DIR/rpms"
+echo "Resuming Build in Directory"
 echo "----------------------------------------------------------------"
-cd $BUILD_DIR
-curl -L -O $pdmenuSourceUrl
-cd ..
+dir=$resumedir
+export BUILD_DIR="$PWD/$dir"
+out_dir="appliance"
+echo "----------------------------------------------------------------"
+echo "Relative Build Direcory: $dir"
+echo "Full Path Build Directory: $BUILD_DIR"
+echo "----------------------------------------------------------------"
+fi
 
 # Download ISO
-isoFile="LoginEnterprise-4.8.10.iso"
+isoFile="LoginEnterprise-5.4.6.iso"
 echo "----------------------------------------------------------------"
 echo "Downloading Update ISO to $BUILD_DIR/$isoFile"
 echo "----------------------------------------------------------------"
@@ -74,29 +93,28 @@ if ! [ -d /media/iso/update ]; then
 fi
 
 # Download Appliance VHD zip
-applianceFile="AZ-VA-LoginEnterprise-4.8.10.zip"
+applianceFileZip="AZ-VA-LoginEnterprise-5.4.6.zip"
+applianceFileVhd="AZ-VA-LoginEnterprise-5.4.6.vhd"
 echo "----------------------------------------------------------------"
-echo "Downloading Virtual Appliance to $BUILD_DIR/$applianceFile"
+echo "Downloading Virtual Appliance to $BUILD_DIR/$applianceFileZip"
 echo "----------------------------------------------------------------"
 
-if ! [ -f $BUILD_DIR/$applianceFile ]; then
-  curl -o $BUILD_DIR/$applianceFile https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFile
+if ! [ -f $BUILD_DIR/$applianceFileZip ]; then
+  curl -o $BUILD_DIR/$applianceFileZip https://loginvsidata.s3.eu-west-1.amazonaws.com/LoginEnterprise/VirtualAppliance/$applianceFileZip
 fi
 
 # Unzip VHD
 echo "----------------------------------------------------------------"
-echo "Unzipping Virtual Appliance VHD $BUILD_DIR/$applianceFile"
+echo "Unzipping Virtual Appliance VHD $BUILD_DIR/$applianceFileZip"
 echo "----------------------------------------------------------------"
-sudo yum install -y unzip
-if ! [ -f $BUILD_DIR/"${applianceFile/zip/vhd}" ]; then
-  unzip -d $BUILD_DIR $BUILD_DIR/$applianceFile
+if ! [ -f $BUILD_DIR/$applianceFileVhd ]; then
+  unzip -d $BUILD_DIR $BUILD_DIR/$applianceFileZip
 fi
 
 # Mount VHD
 echo "----------------------------------------------------------------"
 echo "Mounting Virtual Hard Drive"
 echo "----------------------------------------------------------------"
-sudo yum install -y libguestfs-tools
 sudo mkdir /mnt/vhd
 sudo chmod 777 /mnt/vhd
 
@@ -105,7 +123,7 @@ LIBGUESTFS_BACKEND=direct
 export LIBGUESTFS_BACKEND
 
 if ! [ -d /mnt/vhd/loginvsi ]; then
-  guestmount --add $mountpath/AZ-VA-LoginEnterprise-4.8.10.vhd --ro /mnt/vhd/ -m /dev/sda1
+  guestmount --add $mountpath/AZ-VA-LoginEnterprise-5.4.6.vhd --ro /mnt/vhd/ -m /dev/sda1
 fi
 
 # Fail if VHD doesn't exist
@@ -131,10 +149,6 @@ cp -r /mnt/vhd/loginvsi $build_out/
 mkdir -p $build_out/etc/systemd/system/
 cp -f /mnt/vhd/etc/systemd/system/loginvsid.service $build_out/etc/systemd/system/loginvsid.service
 
-# Copy rpms
-mkdir -p $build_out/rpms
-cp -r $BUILD_DIR/*.rpm $build_out/rpms/
-
 # Copy Docker Images
 imageFile="images.tar.gz"
 mkdir -p $build_out/images
@@ -143,12 +157,19 @@ cp -r /media/iso/$imageFile $build_out/images/
 #Copy Login Enterprise Service Watcher
 cp -f /mnt/vhd/etc/systemd/system/pi_guard.service $build_out/etc/systemd/system/pi_guard.service
 
+echo "----------------------------------------------------------------"
+echo "Downloading pdmenu to $BUILD_DIR/rpms"
+echo "----------------------------------------------------------------"
+# Download pdmenu for rhel/centos
+pdmenuSourceUrl="https://download.opensuse.org/repositories/shells/CentOS_5/x86_64/pdmenu-1.3.2-3.2.x86_64.rpm"
+cd $BUILD_DIR
+curl -L -O $pdmenuSourceUrl
+
 #Copy firstrun, daemon and Menuing
 mkdir -p $build_out/usr/bin
 cp -f /mnt/vhd/usr/bin/loginvsid $build_out/usr/bin/loginvsid
+cp -f /mnt/vhd/usr/bin/pdmenu $build_out/usr/bin/pdmenu
 curl -o $build_out/usr/bin/pdmenu https://github.com/mkent-at-loginvsi/rhel-install/raw/main/pdmenu/pdmenu.rhel
-
-# Fix firstrun
 
 #zip up appliance build
 echo "----------------------------------------------------------------"
